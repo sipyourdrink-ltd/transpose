@@ -86,7 +86,13 @@ Both listings are output from a sample data folder, trimmed, with the ids shorte
 
 **Which account is the source?** The one the Claude Code CLI is logged in to. Pass `--from-account <id>` to name another, or `--all-accounts` to gather the sessions of every account into the current one. If the app is still signed in to the source account, the script stops and says so.
 
-The menu-bar app offers the same four actions: move, check, gather from all accounts, census.
+The menu-bar app offers the same four actions: move, check, gather from all accounts, census. The top line is a live status read; the menu follows your system language.
+
+<div align="center">
+<img alt="Transpose menu-bar menu in English" src="assets/menu-en.png" width="340">
+&nbsp;&nbsp;
+<img alt="Transpose menu-bar menu in Russian" src="assets/menu-ru.png" width="340">
+</div>
 
 ### what is carried
 
