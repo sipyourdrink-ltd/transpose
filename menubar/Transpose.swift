@@ -3,6 +3,11 @@ import ServiceManagement
 
 // Transpose: a menu-bar front end for the two scripts bundled in Contents/Resources.
 // It runs them with the system /usr/bin/python3 and shows their output in a window.
+// Menu and dialogs follow the macOS language: Russian when it comes first, English otherwise.
+// The scripts' own output is always English.
+
+let russian = Locale.preferredLanguages.first?.hasPrefix("ru") ?? false
+func L(_ en: String, _ ru: String) -> String { russian ? ru : en }
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -35,34 +40,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
         menu.removeAllItems()
 
-        let statusItem = NSMenuItem(title: "Checking…", action: nil, keyEquivalent: "")
+        let statusItem = NSMenuItem(title: L("Checking…", "Проверяю…"), action: nil, keyEquivalent: "")
         statusItem.isEnabled = false
         menu.addItem(statusItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        let switchAccountItem = NSMenuItem(title: "Move Sessions and Groups to This Account", action: #selector(switchToAccount), keyEquivalent: "")
+        let switchAccountItem = NSMenuItem(title: L("Move Sessions and Groups to This Account", "Перенести чаты и группы на этот аккаунт"), action: #selector(switchToAccount), keyEquivalent: "")
         menu.addItem(switchAccountItem)
 
-        let dryRunItem = NSMenuItem(title: "Check (Dry Run)", action: #selector(checkAccount), keyEquivalent: "")
+        let dryRunItem = NSMenuItem(title: L("Check (Dry Run)", "Проверить (dry run)"), action: #selector(checkAccount), keyEquivalent: "")
         menu.addItem(dryRunItem)
 
-        let allAccountsItem = NSMenuItem(title: "Gather Sessions from All Accounts", action: #selector(mergeAllAccounts), keyEquivalent: "")
+        let allAccountsItem = NSMenuItem(title: L("Gather Sessions from All Accounts", "Собрать чаты со всех аккаунтов"), action: #selector(mergeAllAccounts), keyEquivalent: "")
         menu.addItem(allAccountsItem)
 
-        let cardItem = NSMenuItem(title: "Account Census", action: #selector(listAccounts), keyEquivalent: "")
+        let cardItem = NSMenuItem(title: L("Account Census", "Перепись аккаунтов"), action: #selector(listAccounts), keyEquivalent: "")
         menu.addItem(cardItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(NSMenuItem(title: "Open Claude", action: #selector(openClaudeApp), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: L("Open Claude", "Открыть Claude"), action: #selector(openClaudeApp), keyEquivalent: ""))
 
-        let launchAtLoginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        let launchAtLoginItem = NSMenuItem(title: L("Launch at Login", "Запускать при входе"), action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
         launchAtLoginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(launchAtLoginItem)
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Transpose", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: L("Quit Transpose", "Выйти из Transpose"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
         // Update the status line asynchronously from a read-only check.
         Task {
@@ -119,10 +124,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             alert.messageText = msg
             alert.alertStyle = .warning
             alert.addButton(withTitle: "OK")
-            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: L("Cancel", "Отмена"))
             let response = alert.runModal()
             if response != .alertFirstButtonReturn {
-                return "Cancelled."
+                return L("Cancelled.", "Отменено.")
             }
         }
 
@@ -160,25 +165,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func switchToAccount(_ sender: NSMenuItem) {
         Task {
-            _ = await runScript(switchScriptPath, arguments: ["--yes"], confirmMessage: "Claude will quit and reopen.", title: "Move to This Account")
+            _ = await runScript(switchScriptPath, arguments: ["--yes"], confirmMessage: L("Claude will quit and reopen.", "Claude закроется и откроется снова."), title: L("Move to This Account", "Перенос на этот аккаунт"))
         }
     }
 
     @objc private func checkAccount(_ sender: NSMenuItem) {
         Task {
-            _ = await runScript(switchScriptPath, arguments: ["--check"], showResult: true, title: "Check (Dry Run)")
+            _ = await runScript(switchScriptPath, arguments: ["--check"], showResult: true, title: L("Check (Dry Run)", "Проверка (dry run)"))
         }
     }
 
     @objc private func mergeAllAccounts(_ sender: NSMenuItem) {
         Task {
-            _ = await runScript(switchScriptPath, arguments: ["--yes", "--all-accounts", "--allow-same"], confirmMessage: "This copies the sessions of every account into the account the app is signed in to. Claude will quit and reopen.", title: "Gather Sessions")
+            _ = await runScript(switchScriptPath, arguments: ["--yes", "--all-accounts", "--allow-same"], confirmMessage: L("This copies the sessions of every account into the account the app is signed in to. Claude will quit and reopen.", "Чаты всех аккаунтов будут скопированы в аккаунт, в который вошло приложение. Claude закроется и откроется снова."), title: L("Gather Sessions", "Сбор чатов"))
         }
     }
 
     @objc private func listAccounts(_ sender: NSMenuItem) {
         Task {
-            _ = await runScript(cardScriptPath, arguments: ["card"], showResult: true, title: "Account Census")
+            _ = await runScript(cardScriptPath, arguments: ["card"], showResult: true, title: L("Account Census", "Перепись аккаунтов"))
         }
     }
 
